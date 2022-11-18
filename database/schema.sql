@@ -10,14 +10,19 @@ values ('bagasjiwanta@gmail.com', 'Andika Bagas', '5317cfae761112a6420d7969e57c3
 insert into users (email, name, password)
 values ('natanaeldias@gmail.com', 'ND27', '2fc465b3a3d62495fccc6ea5af6631c74e6599d4e5f6392aee6cf58bb47f3f48');
 
-create table store (
+create table stores (
 	id integer primary key,
 	name varchar(100) not null,
 	user_id integer not null,
 	foreign key (user_id) references users(id)
 );
 
-create table product (
+insert into stores (name, user_id)
+values ('nasi goreng bagas', 1);
+insert into stores (name, user_id)
+values ('toko sandal', 2);
+
+create table products (
 	id integer primary key,
 	code varchar(50) unique,
 	name varchar(50),
@@ -35,8 +40,18 @@ create table product (
 	foreign key (store_id) references store(id)
 );
 
-create table category (
+create table categories (
 	id integer primary key,
-	name varchar(20),
-	description varchar(100)
+	name varchar(20) not null,
+	description varchar(100),
+	store_id integer not null,
+	foreign key (store_id) references stores(id)
 );
+
+insert into categories (name, description, store_id)
+values 
+	('nasi goreng', 'varian nasgor', 1),
+	('minuman', 'varian minum', 1),
+	('mie goreng', 'tambahan', 1),
+	('bahan pokok', 'stok bahan pokok seperti beras, daging, dll', 1),
+	('tambahan', 'pengeluaran tambahan seperti gas, air cuci, dll', 1);
