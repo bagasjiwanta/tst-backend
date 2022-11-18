@@ -9,6 +9,7 @@ def get_db():
         db = g._database = sqlite3.connect(dbpath)
     return db
 
+
 def query(query, args=(), one=False, read=True):
     cursor = get_db().execute(query, args)
     if read:

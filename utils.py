@@ -11,12 +11,13 @@ def get_hash(string):
     else:
         return None
 
-def encode_token(email, name):
+def encode_token(id, email, name):
     try:
         payload = {
             'exp': datetime.datetime.utcnow() + datetime.timedelta(days=3),
             'iat': datetime.datetime.utcnow(),
-            'sub': email,
+            'email': email,
+            'id': id,
             'name': name
         }
         return jwt.encode(
@@ -35,10 +36,20 @@ def authorize():
         payload = jwt.decode(token, os.environ.get('secret'), algorithms=["HS256"])
         ret = {
             'email': payload.get('email'),
-            'name': payload.get('name')
+            'name': payload.get('name'),
+            'id': payload.get('id')
         }
         return ret
     except jwt.ExpiredSignatureError:
         return 'token expired'
     except jwt.InvalidTokenError:
         return 'token invalid'
+
+def res(message="success", code=200, data=None ):
+    ret = {
+        "message" : message
+    }
+    if data is not None:
+        ret['data'] = data
+    return (ret, code)
+
