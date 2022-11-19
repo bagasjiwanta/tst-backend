@@ -1,9 +1,7 @@
 # Setups
-from flask import Flask, request, g, abort
-from flask_restful import Api, Resource, reqparse
-from database.dbmanager import query, get_db
-from src.utils import res
-from src.auth import authorize 
+from flask import Flask, g
+from flask_restful import Api
+from database.dbmanager import  get_db
 from dotenv import load_dotenv
 from src.stores import Store
 from src.auth import Signin, Signup

@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from database.dbmanager import query
+from database.dbmanager import queryc
 from flask import abort
 from src.utils import res
 from src.auth import authorize
@@ -7,7 +7,7 @@ from src.auth import authorize
 class Category(Resource):
 
     def check_store_owner(self, store_id, user_id):
-        owner = query('select user_id from stores where id = ?', (store_id, ), one=True)
+        owner = queryc('select user_id from stores where id = ?', (store_id, ), one=True)
         if owner[0] != user_id:
             abort(403, "you are not the store owner")
 
@@ -19,7 +19,7 @@ class Category(Resource):
         self.check_store_owner(store_id, user['id'])
         
         # get categories
-        categories = query('select id, name, description from categories where store_id = ?', (store_id, ))
+        categories = queryc('select id, name, description from categories where store_id = ?', (store_id, ))
         for i in range(len(categories)):
             id, name, description = categories[i]
             categories[i] = {
@@ -43,12 +43,14 @@ class Category(Resource):
         # insert categories
         with_description = 'description' in args
         if with_description:
-            affected = query("insert into categories (name, description, store_id) values(?, ?, ?)", 
-                (args['name'], args['description'], store_id), read=False)
-            print(affected)
+            lastrowid = queryc("insert into categories (name, description, store_id) values(?, ?, ?)", 
+                (args['name'], args['description'], store_id), type="insert")
+            if lastrowid == 0:
+                abort(500, "insert error")
         else:
-            query("insert into categories (name, store_id) values(?, ?)", (args['name'], store_id), read=False)
-
+            lastrowid = queryc("insert into categories (name, store_id) values(?, ?)", (args['name'], store_id), type="insert")
+            if lastrowid == 0:
+                abort(500, 'insert error')
         return res()
 
     def delete(self, store_id):
@@ -62,7 +64,9 @@ class Category(Resource):
         parser.add_argument('id', type=int, required=True)
         args = parser.parse_args()
 
-        query('delete from categories where store_id = ? and id = ?', 
-            (store_id, args['id']), read=False)
+        affected = queryc('delete from categories where store_id = ? and id = ?', 
+            (store_id, args['id']), type="delete")
+        if affected == 0:
+            return res("delete error", 500)
         return res()
 

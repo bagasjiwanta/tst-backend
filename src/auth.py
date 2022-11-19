@@ -4,7 +4,7 @@ import jwt
 import os
 from flask import request, abort
 from flask_restful import Resource, reqparse
-from database.dbmanager import query
+from database.dbmanager import queryc
 from src.utils import res
 
 # for hashing password
@@ -33,7 +33,7 @@ def encode_token(id, email, name):
         return e
 
 # check authorization
-def authorize():
+def authorize() -> dict[str, str]: 
     if type(request.headers.get('Authorization')) is not str:
         abort(401, 'token missing')
     bearer = request.headers.get('Authorization')
@@ -64,7 +64,7 @@ class Signin(Resource):
         args = parser.parse_args()
 
         # check email
-        check_user = query('select * from users where email = ?', [args['email']], one=True)
+        check_user = queryc('select * from users where email = ?', [args['email']], one=True)
         if check_user is None:
             return res("user with email " + args['email'] + " does not exists", 400)
 
@@ -83,6 +83,7 @@ class Signin(Resource):
 class Signup(Resource):
     
     def post(self):
+        # args
         parser = reqparse.RequestParser(bundle_errors=True)
         parser.add_argument('email', type=str, required=True)
         parser.add_argument('password', type=str, required=True)
@@ -90,7 +91,7 @@ class Signup(Resource):
         args = parser.parse_args()
 
         # check if user already exists
-        check_user = query('select * from users where email = ?', [args['email']], one=True)
+        check_user = queryc('select * from users where email = ?', [args['email']], one=True)
         if check_user is not None:
             return res("user already exists", 400)
 
@@ -98,7 +99,7 @@ class Signup(Resource):
         password = get_hash(args['password'])
         sql = "insert into users (email, password, name) values(?, ?, ?)"
         variables = (args['email'], password, args['name'])
-        insert_id = query(sql, variables, read=False)
+        insert_id = queryc(sql, variables, type="insert")
         if insert_id is None:
             return res("failed creating user", 400)
         return res("signup success")
