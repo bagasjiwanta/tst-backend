@@ -30,6 +30,7 @@ class Store(Resource):
         # args
         parser = reqparse.RequestParser(bundle_errors=True)
         parser.add_argument('name', type=str, required=True)
+        parser.add_argument('mock', type=bool)
         args = parser.parse_args()
 
         # check if store already exists
@@ -46,6 +47,13 @@ class Store(Resource):
         try:
             lastid = query('insert into stores (name, user_id) values(?, ?)', (args['name'], user['id']), type="insert")
             init_store_db(lastid)
+            if args['mock']:
+                f = open('database/store/mock.sql', mode="r")
+                store_db = sqlite3.connect('database/store/' + str(lastid) + '.db')
+                cursor = store_db.executescript(f.read())
+                cursor.close()
+                store_db.close()
+        
             return res("store created with id = " + str(lastid))
 
         except sqlite3.Error as e:
@@ -71,10 +79,5 @@ class Store(Resource):
         db_exists = os.path.isfile('database/store/' + str(args['id']) + '.db')
         if db_exists:
             os.remove('database/store/' + str(args['id']) + '.db')
-            
-
-        # To do : delete products associated with this store
-        
-        # To do : delete categories associated with this store
 
         return res("store '" + store_name[0]  + "' deleted")

@@ -6,9 +6,9 @@ create table users (
 );
 
 insert into users (email, name, password)
-values ('user123@example.com', 'User 123', 'e606e38b0d8c19b24cf0ee3808183162ea7cd63ff7912dbb22b5e803286b4446');
+values ('user123@example.com', 'Bagas', 'e606e38b0d8c19b24cf0ee3808183162ea7cd63ff7912dbb22b5e803286b4446');
 insert into users (email, name, password)
-values ('user456@example.com', 'User 456', 'c670f7b23c1bf997ec890e9d23ea7c016e12b243bdbd151f08baf5f0b86a7c5e');
+values ('user456@example.com', 'Dias', 'c670f7b23c1bf997ec890e9d23ea7c016e12b243bdbd151f08baf5f0b86a7c5e');
 
 create table stores (
 	id integer primary key,
