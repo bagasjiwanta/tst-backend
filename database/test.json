@@ -3,11 +3,11 @@
     {
       "name": "asc"
     }, {
-      "stock": "dsc"
+      "stock": "desc"
     }, {
-      "buy_price": "dsc"
+      "buy_price": "desc"
     }, {
-      "sell_price": "dsc"
+      "sell_price": "desc"
     },  {
       "category": "asc"
     }

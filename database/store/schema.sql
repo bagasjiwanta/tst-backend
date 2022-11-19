@@ -11,7 +11,6 @@ create table if not exists products (
 	sell_tax varchar(10),
 	minimum_stock integer default 0,
 	category_id integer,
-	store_id integer not null,
 	foreign key (category_id) references category(id)
 );
 
