@@ -14,7 +14,12 @@ api = Api(app)
 
 @app.route("/")
 def greet():
-    return "<h1>Hello TST</h1>"
+    return """
+<div>
+<h1>Welcome to Product Management API</h1>
+<h3> See <a href="https://docs.google.com/document/d/1jY5fNt736Rux6QwNjj-QJZ2OrJq1gOgEvFjUsfngLCs"> documentation </a> </h3>
+</div>
+    """
 
 @app.teardown_appcontext
 def close_connection(exception):

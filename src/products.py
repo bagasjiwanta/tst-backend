@@ -1,5 +1,6 @@
 from flask_restful import Resource, reqparse
 from src.utils import res
+from src.auth import authorize
 from database.dbmanager import query
 
 class Product(Resource):
@@ -18,6 +19,7 @@ class Product(Resource):
 
 
     def get(self, store_id):
+        authorize()
         # filter -> sort -> search
         parser = reqparse.RequestParser(bundle_errors=True)
         parser.add_argument('keyword', type=str)
@@ -69,6 +71,7 @@ class Product(Resource):
         return res(data=data)
 
     def delete(self, store_id):
+        authorize()
         parser = reqparse.RequestParser(bundle_errors=True)
         parser.add_argument('id', type=str, required=True)
         args = parser.parse_args()
@@ -80,6 +83,7 @@ class Product(Resource):
 
 
     def post(self, store_id):
+        authorize()
         parser = reqparse.RequestParser(bundle_errors=True)
         parser.add_argument('name', type=str, required=True)
         parser.add_argument('description', type=str)
@@ -109,6 +113,7 @@ class Product(Resource):
         return res()
     
     def update(self, store_id):
+        authorize()
         parser = reqparse.RequestParser(bundle_errors=True)
         parser.add_argument('id', type=int, required=True)
         parser.add_argument('name', type=str, required=True)
