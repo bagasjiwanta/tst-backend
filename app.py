@@ -12,6 +12,10 @@ load_dotenv()
 app = Flask(__name__)
 api = Api(app)
 
+@app.route("/")
+def greet():
+    return "<h1>Hello TST</h1>"
+
 @app.teardown_appcontext
 def close_connection(exception):
     db = getattr(g, '_database', None)
