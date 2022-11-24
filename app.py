@@ -1,5 +1,5 @@
 # Setups
-from flask import Flask, g
+from flask import Flask, g, redirect
 from flask_restful import Api
 from database.dbmanager import  get_db
 from dotenv import load_dotenv
@@ -14,12 +14,7 @@ api = Api(app)
 
 @app.route("/")
 def greet():
-    return """
-<div>
-<h1>Welcome to Product Management API</h1>
-<h3> See <a href="https://docs.google.com/document/d/1jY5fNt736Rux6QwNjj-QJZ2OrJq1gOgEvFjUsfngLCs"> documentation </a> </h3>
-</div>
-    """
+    return redirect('https://documenter.getpostman.com/view/20104423/2s8YsqTuBL')
 
 @app.teardown_appcontext
 def close_connection(exception):
