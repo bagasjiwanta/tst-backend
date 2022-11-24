@@ -5,7 +5,7 @@ from database.dbmanager import query
 
 class Product(Resource):
     
-    def sort_str_to_query(sort='name', order="asc") -> str | None:
+    def sort_str_to_query(sort='name', order="asc"):
         if order != "asc" and order != "desc":
             order = None
         
@@ -23,7 +23,7 @@ class Product(Resource):
         # filter -> sort -> search
         parser = reqparse.RequestParser(bundle_errors=True)
         parser.add_argument('keyword', type=str)
-        parser.add_argument('sort', type=list[dict[str, str]])
+        parser.add_argument('sort', type=list(dict(str, str)))
         parser.add_argument('filter', type=dict)
         parser.add_argument('full_search', type=bool)
         parser.add_argument('highlight', type=bool)

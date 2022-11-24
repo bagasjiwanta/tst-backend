@@ -19,7 +19,7 @@ def query(
     one = False, 
     type = "select", 
     store = False, 
-    store_id: None | int = None
+    store_id = None
     ):
     if store:
         db = get_store_db(store_id)
