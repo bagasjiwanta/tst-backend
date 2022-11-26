@@ -22,7 +22,7 @@ def encode_token(id, email, name):
             'exp': datetime.datetime.utcnow() + datetime.timedelta(days=3),
             'iat': datetime.datetime.utcnow(),
             'email': email,
-            'id': id,
+            'id': str(id),
             'name': name
         }
         return jwt.encode(
@@ -33,7 +33,7 @@ def encode_token(id, email, name):
         return e
 
 # check authorization
-def authorize() -> dict[str, str]: 
+def authorize(): 
     if type(request.headers.get('Authorization')) is not str:
         abort(401, 'token missing')
     bearer = request.headers.get('Authorization')
@@ -62,7 +62,6 @@ class Signin(Resource):
         parser.add_argument('email', type=str, required=True)
         parser.add_argument('password', type=str, required=True)
         args = parser.parse_args()
-
         # check email
         check_user = query('select * from users where email = ?', [args['email']], one=True)
         if check_user is None:
@@ -74,6 +73,7 @@ class Signin(Resource):
         # check password
         if hashed == password:
             token = encode_token(id, email, name)
+            print(os.environ.get('secret'))
             return res(data=token)
         
         return res("email or password mismatch", 400)
