@@ -4,6 +4,19 @@ from src.auth import authorize
 from database.dbmanager import query, get_store_db
 
 class Product(Resource):
+    
+    def sort_str_to_query(sort='name', order="asc"):
+        if order != "asc" and order != "desc":
+            order = None
+        
+        if sort != 'name' and sort != 'stock' and sort != 'code' and sort != 'buy_price' and sort != 'sell_price' and sort != 'category':
+            sort = None
+
+        if order is None or sort is None:
+            return None
+        
+        return sort + " " + order
+
 
     def get(self, store_id):
         authorize()
