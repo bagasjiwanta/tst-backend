@@ -1,74 +1,107 @@
 from flask_restful import Resource, reqparse
 from src.utils import res
 from src.auth import authorize
-from database.dbmanager import query
+from database.dbmanager import query, get_store_db
 
 class Product(Resource):
-    
-    def sort_str_to_query(sort='name', order="asc"):
-        if order != "asc" and order != "desc":
-            order = None
-        
-        if sort != 'name' and sort != 'stock' and sort != 'code' and sort != 'buy_price' and sort != 'sell_price' and sort != 'category':
-            sort = None
-
-        if order is None or sort is None:
-            return None
-        
-        return sort + " " + order
-
 
     def get(self, store_id):
         authorize()
         # filter -> sort -> search
         parser = reqparse.RequestParser(bundle_errors=True)
-        parser.add_argument('keyword', type=str)
-        parser.add_argument('sort', type=list(dict(str, str)))
-        parser.add_argument('filter', type=dict)
-        parser.add_argument('full_search', type=bool)
-        parser.add_argument('highlight', type=bool)
+        parser.add_argument('highlight', type=str, default="")
+        parser.add_argument('low_stock', type=bool, default=False)
+        parser.add_argument('sales', )
         args = parser.parse_args()
 
-        # todo
-        prefix = """
-        select p.code code, p.name name, p.description description, p.stock stock, p.buy_price buy_price,
-        p.sell_price sell_price, c.name category
-        from products p inner join categories c on p.category_id = c.id 
-        """
-
-        if 'full_search' in args and args['full_search'] is True:
+        if len(args['highlight']) > 0:
+            print(args['highlight'])
             sql = """
-                CREATE VIRTUAL TABLE productsearch
-                USING FTS5(pname, pdescription, pcode, cname); 
+drop table if exists searching;
+
+create virtual table searching
+using fts5(id, name, description, category);
+
+insert into searching (id, name, description, category)
+select p.id id, p.name name, p.description description, c.name category
+from products p inner join categories c on p.category_id = c.id;
             """
-
-        if args['sort'] is not None:
-            sorter = []
-            for i in range(len(args['sort'])):
-                for sort, order in args['sort'][i].items():
-                    sort_str = Product.sort_str_to_query(sort, order)
-                    if sort_str is not None:
-                        sorter.append(sort_str)
+            db = get_store_db(store_id)
+            cursor = db.cursor()
+            cursor.executescript(sql)
+            db.commit()
+            sql2 = """
+select 
+    id,
+    highlight(searching, 1, '<b>', '</b>') name,
+    highlight(searching, 2, '<b>', '</b>') description,
+    highlight(searching, 3, '<b>', '</b>') category
+from searching
+where searching match ?
+order by rank"""
+            result = cursor.execute(sql2, (args['highlight'], )).fetchall()
+            for i in range(len(result)):
+                id, name, description, category = result[i]
+                result[i] = {
+                    'id': id,
+                    'name': name,
+                    'description': description,
+                    'category': category
+                }
+            return res(data=result)
         
-        if 'search' in args:
-            pass
+        elif args['low_stock']:
+            low_stock = query("select low_stock_percentage from stores where id = ?", (int(store_id), ), one=True)
 
-        data = query('select * from products limit 10', store=True, store_id=store_id)
-        for i in range(len(data)):
-            id, name, description, stock, unit, buy_price, sell_price, minimum_stock, category_id = data[i]
-            data[i] = {
-                'id': id,
-                'name': name,
-                'description': description,
-                'stock': stock,
-                'unit': unit,
-                'buy_price' : buy_price,
-                'sell_price' : sell_price,
-                'minimum_stock': minimum_stock,
-                'category_id': category_id
-            } 
+            data = query("""
+select *
+from products inner join categories c where products.category_id = c.id 
+and buy_price is not null and stock <= ? * minimum_stock """, 
+                store=True, 
+                store_id=store_id, 
+                args=(float(low_stock[0]), )
+            )
 
-        return res(data=data)
+            for i in range(len(data)):
+                id, name, description, stock, unit, buy_price, sell_price, minimum_stock, category_id, _c, category = data[i]
+                data[i] = {
+                    'id': id,
+                    'name': name,
+                    'description': description,
+                    'stock': stock,
+                    'unit': unit,
+                    'buy_price' : buy_price,
+                    'sell_price' : sell_price,
+                    'minimum_stock': minimum_stock,
+                    'category_id': category_id,
+                    'category': category
+                } 
+
+            return res(data=data)
+        
+        else:
+            data = query(
+'''
+select *
+from products inner join categories c where products.category_id = c.id
+''', store=True, store_id=store_id
+            )
+
+            for i in range(len(data)):
+                id, name, description, stock, unit, buy_price, sell_price, minimum_stock, category_id, _c, category = data[i]
+                data[i] = {
+                    'id': id,
+                    'name': name,
+                    'description': description,
+                    'stock': stock,
+                    'unit': unit,
+                    'buy_price' : buy_price,
+                    'sell_price' : sell_price,
+                    'minimum_stock': minimum_stock,
+                    'category_id': category_id,
+                    'category': category
+                } 
+            return res(data=data)
 
     def delete(self, store_id):
         authorize()

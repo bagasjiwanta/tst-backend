@@ -8,7 +8,7 @@ class Category(Resource):
 
     def check_store_owner(self, store_id, user_id):
         owner = query('select user_id from stores where id = ?', (store_id, ), one=True)
-        if owner[0] != user_id:
+        if owner[0] != int(user_id):
             abort(403, "you are not the store owner")
 
     def get(self, store_id):
@@ -19,11 +19,11 @@ class Category(Resource):
         self.check_store_owner(store_id, user['id'])
         
         # get categories
-        categories = query('select id, name, description from categories', store=True, store_id=store_id)
+        categories = query('select id, name from categories', store=True, store_id=store_id)
         for i in range(len(categories)):
-            id, name, description = categories[i]
+            id, name = categories[i]
             categories[i] = {
-                'id': id, 'name': name, 'description': description
+                'id': id, 'name': name
             }
         return res(data = categories)
     
@@ -37,23 +37,15 @@ class Category(Resource):
         # args
         parser = reqparse.RequestParser(bundle_errors=True)
         parser.add_argument('name', type=str, required=True)
-        parser.add_argument('description', type=str)
         args = parser.parse_args()
 
         # insert categories
-        with_description = 'description' in args
-        if with_description:
-            lastrowid = query("insert into categories (name, description) values(?, ?)", 
-                (args['name'], args['description']), type="insert", store=True, store_id=store_id)
-            print(lastrowid)
-            if lastrowid == 0:
-                abort(500, "insert error")
-        else:
-            lastrowid = query("insert into categories (name) values(?)", (args['name'], ), type="insert", 
-                store=True, store_id=store_id)
-            print(lastrowid)
-            if lastrowid == 0:
-                abort(500, 'insert error')
+
+        lastrowid = query("insert into categories (name) values(?)", (args['name'], ), type="insert", 
+            store=True, store_id=store_id)
+        print(lastrowid)
+        if lastrowid == 0:
+            abort(500, 'insert error')
         return res()
 
     def delete(self, store_id):

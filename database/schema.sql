@@ -1,8 +1,8 @@
 create table users (
 	id integer primary key,
-	email varchar(100) not null unique,
-	name varchar(50) not null,
-	password varchar(300) not null
+	email text not null unique,
+	name text not null,
+	password text not null
 );
 
 insert into users (email, name, password)
@@ -12,8 +12,8 @@ values ('user456@example.com', 'Dias', 'c670f7b23c1bf997ec890e9d23ea7c016e12b243
 
 create table stores (
 	id integer primary key,
-	name varchar(100) not null,
+	name text not null,
 	user_id integer not null,
-	low_stock_percentage decimal(10, 2) default 0,
+	low_stock_percentage decimal(10, 2) default 1.5,
 	foreign key (user_id) references users(id)
 );
