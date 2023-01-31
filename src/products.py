@@ -3,8 +3,33 @@ from src.utils import res
 from src.auth import authorize
 from database.dbmanager import query, get_store_db
 
-class Product(Resource):
-    
+class GetAllProduct(Resource):
+    def get(self, store_id):
+        authorize()
+        data = query(
+'''
+select *
+from products inner join categories c where products.category_id = c.id
+''', store=True, store_id=store_id
+            )
+
+        for i in range(len(data)):
+            id, name, description, stock, unit, buy_price, sell_price, minimum_stock, category_id, _c, category = data[i]
+            data[i] = {
+                'id': id,
+                'name': name,
+                'description': description,
+                'stock': stock,
+                'unit': unit,
+                'buy_price' : buy_price,
+                'sell_price' : sell_price,
+                'minimum_stock': minimum_stock,
+                'category_id': category_id,
+                'category': category
+            } 
+        return res(data=data)
+
+class GetProduct(Resource):
     def sort_str_to_query(sort='name', order="asc"):
         if order != "asc" and order != "desc":
             order = None
@@ -18,7 +43,7 @@ class Product(Resource):
         return sort + " " + order
 
 
-    def get(self, store_id):
+    def post(self, store_id):
         authorize()
         # filter -> sort -> search
         parser = reqparse.RequestParser(bundle_errors=True)
@@ -115,6 +140,11 @@ from products inner join categories c where products.category_id = c.id
                     'category': category
                 } 
             return res(data=data)
+
+
+
+class Product(Resource):
+
 
     def delete(self, store_id):
         authorize()

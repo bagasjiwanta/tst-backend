@@ -6,11 +6,13 @@ from dotenv import load_dotenv
 from src.stores import Store
 from src.auth import Signin, Signup
 from src.categories import Category
-from src.products import Product
+from src.products import Product, GetAllProduct, GetProduct
+from flask_cors import CORS
 load_dotenv()
 
 app = Flask(__name__)
 api = Api(app)
+CORS(app)
 
 @app.route("/")
 def greet():
@@ -33,6 +35,8 @@ def init_db():
 # setup routes
 api.add_resource(Store, '/store')
 api.add_resource(Category, '/store/<int:store_id>/categories')
+api.add_resource(GetAllProduct, '/store/<int:store_id>/products/all')
+api.add_resource(GetProduct, '/store/<int:store_id>/products/custom')
 api.add_resource(Product, '/store/<int:store_id>/products')
 api.add_resource(Signin, '/signin')
 api.add_resource(Signup, '/signup')

@@ -20,6 +20,7 @@ class Store(Resource):
             stores[i] = {
                 'id': id, 'name': name
             }
+        print(stores)
         return res(data=stores)
             
 

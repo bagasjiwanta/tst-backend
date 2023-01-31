@@ -62,6 +62,7 @@ class Signin(Resource):
         parser.add_argument('email', type=str, required=True)
         parser.add_argument('password', type=str, required=True)
         args = parser.parse_args()
+
         # check email
         check_user = query('select * from users where email = ?', [args['email']], one=True)
         if check_user is None:
@@ -73,7 +74,6 @@ class Signin(Resource):
         # check password
         if hashed == password:
             token = encode_token(id, email, name)
-            print(os.environ.get('secret'))
             return res(data=token)
         
         return res("email or password mismatch", 400)
